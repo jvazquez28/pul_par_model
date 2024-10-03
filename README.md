@@ -1,1 +1,0 @@
-# pul_par_model
