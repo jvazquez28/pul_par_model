@@ -1,4 +1,4 @@
-# pul_par_modelAquí tienes un modelo detallado de un archivo README para tu proyecto de predicción de disponibilidad de aparcamiento:
+Aquí tienes un README combinado, que integra elementos de ambos documentos y proporciona una visión completa del proyecto de predicción de disponibilidad de aparcamiento:
 
 ---
 
@@ -42,6 +42,7 @@ project_directory/
 │   ├── model_training.ipynb   # Notebook para el entrenamiento del modelo
 │
 └── requirements.txt           # Dependencias del proyecto
+└── predictor.py               # Script para realizar predicciones en tiempo real
 ```
 
 ## Generación de Datos Sintéticos
@@ -80,7 +81,19 @@ all_barrios = [barrio for barrio_list in barrios.values() for barrio in barrio_l
 n = 200000
 
 data = {
-    # ... (Definición de los datos simulados)
+    'ID de Viaje': np.arange(n),
+    'Punto de Destino': np.random.choice(all_barrios, n),
+    'Punto de Salida': np.random.choice(all_barrios, n),
+    'Tiempo ETA (min)': np.random.randint(5, 30, n),
+    'Distancia (km)': np.random.uniform(0.5, 10.0, n),
+    'Fecha y Hora de Llegada': pd.date_range(start='2024-01-01', periods=n, freq='H'),
+    'Tipo de Zona': np.random.choice(['Residencial', 'Comercial'], n),
+    'Día de la Semana': np.random.choice(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'], n),
+    'Barrio': np.random.choice(all_barrios, n),
+    'Evento en el barrio (Sí/No)': np.random.choice(['Sí', 'No'], n),
+    'Densidad Vehicular Actual en el barrio': np.random.uniform(0, 100, n),
+    'Número de reportes de plazas disponibles en ese barrio': np.random.randint(0, 10, n),
+    'He Aparcado (Sí/No)': np.random.choice(['Sí', 'No'], n)
 }
 
 # Crear el DataFrame
@@ -114,7 +127,15 @@ from sklearn.metrics import accuracy_score, classification_report
 import optuna
 from optuna import create_study
 
-# ... (Código para cargar y preparar los datos)
+# Cargar datos
+df = pd.read_csv('data/synthetic_data.csv')
+
+# Preparar datos
+X = df.drop(['He Aparcado (Sí/No)', 'ID de Viaje'], axis=1)
+y = df['He Aparcado (Sí/No)'].map({'Sí': 1, 'No': 0})
+
+# Dividir el dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Entrenamiento del modelo final
 best_params = study.best_params
@@ -139,6 +160,11 @@ print(classification_report(y_test, final_y_pred))
 
 2. **Ejecuta el Notebook**: Abre el notebook `data_generation.ipynb` para generar datos sintéticos y luego el notebook `model_training.ipynb` para entrenar el modelo.
 
+3. **Ejecución del script**: Para realizar predicciones en tiempo real, ejecuta el siguiente comando:
+   ```bash
+   python predictor.py
+   ```
+
 ## Manejo de Datos
 
 Al principio de la aplicación, se recopilarán datos de distintas personas para confirmar si han aparcado. Estos datos se almacenarán y utilizarán para reentrenar el modelo una vez que se disponga de suficiente información real.
@@ -154,7 +180,3 @@ El modelo se evalúa mediante métricas como la precisión y el informe de clasi
 ## Conclusiones
 
 Este proyecto busca proporcionar una solución innovadora para la predicción de la disponibilidad de aparcamiento en Madrid, combinando técnicas de Machine Learning y datos de usuario en tiempo real. A medida que se obtengan más datos reales, se espera que el modelo mejore y ofrezca predicciones más precisas.
-
----
-
-Puedes personalizar este README según tus preferencias y detalles específicos de tu proyecto. ¡Espero que te sea útil!
